@@ -34,9 +34,7 @@ GO
 CREATE TABLE LOP (
     MALOP VARCHAR(20) PRIMARY KEY,
     TENLOP NVARCHAR(100) NOT NULL,
-    MANV VARCHAR(20),
-    MASV VARCHAR(20),
-    MAHP VARCHAR(20)
+    MANV VARCHAR(20)
 );
 GO
 
@@ -59,14 +57,51 @@ GO
 
 -- TEST 
 EXEC SP_INS_PUBLIC_NHANVIEN 
-  @MANV='NV01', @HOTEN=N'Nguyễn Văn A', @EMAIL='nva@fit.edu',
-  @LUONGCB=3000000, @TENDN=N'nva', @MK=N'abcd12';
+	@MANV='NV01', 
+	@HOTEN=N'Nguyễn Văn A', 
+	@EMAIL='nva@fit.edu',
+	@LUONGCB=3000000, 
+	@TENDN=N'nva', 
+	@MK=N'abcd12';
+
+EXEC SP_INS_PUBLIC_NHANVIEN
+	@MANV = 'NV02',
+	@HOTEN = N'Trần Thị B',
+	@EMAIL = 'ttb@fit.edu',
+	@LUONGCB = 9000000,
+	@TENDN = 'ttb',
+	@MK = '67890';
+GO
+
+INSERT INTO LOP (MALOP, TENLOP, MANV)
+VALUES 
+('L01', N'Lớp Công Nghệ Thông Tin 1', 'NV01'),
+('L02', N'Lớp Công Nghệ Thông Tin 2', 'NV02');
+GO
+
+INSERT INTO SINHVIEN (MASV, HOTEN, NGAYSINH, DIACHI, MALOP, TENDN, MATKHAU)
+VALUES
+('SV01', N'Nguyễn Minh Anh', '2002-01-01', N'Quận 1', 'L01', 'sv01', 0x1234),
+('SV02', N'Lê Thị Bích', '2002-02-02', N'Quận 3', 'L01', 'sv02', 0x1234),
+('SV03', N'Phạm Quốc Cường', '2002-03-03', N'Quận 5', 'L02', 'sv03', 0x1234),
+('SV04', N'Võ Thanh Duy', '2002-04-04', N'Quận 7', 'L02', 'sv04', 0x1234),
+('SV05', N'Lý Hải Yến', '2002-05-05', N'Quận 10', 'L02', 'sv05', 0x1234);
+GO
+
+INSERT INTO HOCPHAN (MAHP, TENHP, SOTC)
+VALUES
+('HP01', N'Cơ sở dữ liệu', 3),
+('HP02', N'Mạng máy tính', 3);
+GO
+
 
 SELECT * FROM NHANVIEN
+SELECT * FROM SINHVIEN
+SELECT * FROM LOP
+SELECT * FROM HOCPHAN
+SELECT * FROM BANGDIEM
 
 EXEC SP_SEL_PUBLIC_NHANVIEN
   @TENDN = N'nva',
   @MK    = N'abcd12';
 
-
---DELETE FROM NHANVIEN WHERE TENDN = N'nva'

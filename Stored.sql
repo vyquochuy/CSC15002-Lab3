@@ -248,9 +248,5 @@ BEGIN
 		RAISERROR('Lỗi khi mã hóa hoặc thêm điểm: %s', 16, 1);
 		RETURN;
 	END CATCH
-
-    -- Insert vào bảng điểm
-    INSERT INTO BANGDIEM (MASV, MAHP, DIEMTHI)
-    VALUES (@MASV, @MAHP, @ENCRYPTED_DIEM);
 END
 GO
