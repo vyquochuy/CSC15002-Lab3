@@ -1,37 +1,38 @@
 import tkinter as tk
 from tkinter import messagebox
 import db
-import students_screen
 import login_screen
+import students_screen
 
 def open_dashboard(manv):
-    root = tk.Tk()
-    root.title("Quản lý lớp học")
+    dash = tk.Tk()
+    dash.title("Dashboard - Danh sách lớp")
+    dash.geometry("500x500")
 
-    classes = db.get_classes(manv)
+    tk.Label(dash, text=f"Xin chào {manv}", font=("Arial", 14)).pack(pady=10)
 
-    tk.Label(root, text="Các lớp bạn quản lý:").pack(pady=5)
+    classes = db.get_all_classes()
 
-    listbox = tk.Listbox(root, width=50)
+    listbox = tk.Listbox(dash, width=70)
+    listbox.pack(pady=10)
+
     for lop in classes:
-        listbox.insert(tk.END, f"{lop.MALOP} - {lop.TENLOP}")
-    listbox.pack(pady=5)
+        listbox.insert(tk.END, f"{lop.MALOP} - {lop.TENLOP} (Quản lý: {lop.MANV})")
 
     def open_students():
         selected = listbox.curselection()
         if selected:
-            value = listbox.get(selected[0])
-            malop = value.split(" - ")[0]
-            root.destroy()
-            students_screen.open_students(manv, malop)
+            line = listbox.get(selected[0])
+            parts = line.split(' - ')
+            malop = parts[0].strip()
+            manv_lop = parts[1].split('(Quản lý:')[1].replace(')', '').strip()
+
+            dash.destroy()
+            students_screen.open_students(manv, malop, manv_lop)
         else:
-            messagebox.showwarning("Cảnh báo", "Vui lòng chọn lớp!")
+            messagebox.showwarning("Cảnh báo", "Chọn một lớp trước!")
 
-    tk.Button(root, text="Xem sinh viên", command=open_students).pack(pady=5)
-    tk.Button(root, text="Đăng xuất", command=lambda: logout(root)).pack(pady=5)
+    tk.Button(dash, text="Xem sinh viên", command=open_students).pack(pady=5)
+    tk.Button(dash, text="Đăng xuất", command=lambda: (dash.destroy(), login_screen.open_login())).pack(pady=5)
 
-    root.mainloop()
-
-def logout(current_root):
-    current_root.destroy()
-    login_screen.open_login()
+    dash.mainloop()

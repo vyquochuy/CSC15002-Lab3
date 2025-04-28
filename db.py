@@ -36,3 +36,22 @@ def insert_score(masv, mahp, diemthi, pubkey):
     cursor.execute("EXEC SP_INSERT_BANGDIEM ?, ?, ?, ?", (masv, mahp, diemthi, pubkey))
     conn.commit()
     conn.close()
+
+def get_all_classes():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT MALOP, TENLOP, MANV FROM LOP")
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
+
+def update_student(masv, hoten, ngaysinh, diachi):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE SINHVIEN
+        SET HOTEN = ?, NGAYSINH = ?, DIACHI = ?
+        WHERE MASV = ?
+    """, (hoten, ngaysinh, diachi, masv))
+    conn.commit()
+    conn.close()

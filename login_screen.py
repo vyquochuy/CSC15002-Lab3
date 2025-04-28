@@ -17,7 +17,7 @@ def open_login():
     password_entry.pack()
 
     def handle_login():
-        manv = manv_entry.get()
+        manv = manv_entry.get().upper()
         matkhau = password_entry.get()
         if db.login(manv, matkhau):
             messagebox.showinfo("Thông báo", "Đăng nhập thành công!")
