@@ -76,10 +76,7 @@ def open_students(manv, malop, manv_lop):
     def open_edit_info_screen():
         masv = get_selected_masv()
         if masv:
-            if not is_editable:
-                messagebox.showwarning("Cảnh báo", "Bạn không có quyền sửa sinh viên lớp này!")
-                return
-
+            
             edit_window = tk.Toplevel(stu)
             edit_window.title("Thay đổi thông tin sinh viên")
             edit_window.geometry("400x300")

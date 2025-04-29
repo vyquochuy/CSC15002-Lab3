@@ -21,12 +21,17 @@ def open_dashboard(manv):
 
     def open_students():
         selected = listbox.curselection()
+        
         if selected:
             line = listbox.get(selected[0])
             parts = line.split(' - ')
             malop = parts[0].strip()
             manv_lop = parts[1].split('(Quản lý:')[1].replace(')', '').strip()
 
+            if manv != manv_lop:
+                messagebox.showerror("Cấm truy cập", "Bạn không có quyền xem danh sách sinh viên của lớp này!")
+                return
+            
             dash.destroy()
             students_screen.open_students(manv, malop, manv_lop)
         else:
