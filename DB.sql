@@ -81,11 +81,14 @@ GO
 
 INSERT INTO SINHVIEN (MASV, HOTEN, NGAYSINH, DIACHI, MALOP, TENDN, MATKHAU)
 VALUES
-('SV01', N'Nguyễn Minh Anh', '2002-01-01', N'Quận 1', 'L01', 'sv01', 0x1234),
-('SV02', N'Lê Thị Bích', '2002-02-02', N'Quận 3', 'L01', 'sv02', 0x1234),
-('SV03', N'Phạm Quốc Cường', '2002-03-03', N'Quận 5', 'L02', 'sv03', 0x1234),
-('SV04', N'Võ Thanh Duy', '2002-04-04', N'Quận 7', 'L02', 'sv04', 0x1234),
-('SV05', N'Lý Hải Yến', '2002-05-05', N'Quận 10', 'L02', 'sv05', 0x1234);
+('SV01', N'Nguyễn Minh Anh', '2002-01-01', N'Quận 1', 'L01', 'sv01', nma1),
+('SV02', N'Lê Thị Bích', '2002-02-02', N'Quận 3', 'L01', 'sv02', ltb2),
+('SV03', N'Phạm Quốc Cường', '2002-03-03', N'Quận 5', 'L02', 'sv03', pqc3),
+('SV04', N'Võ Thanh Duy', '2002-04-04', N'Quận 7', 'L02', 'sv04', vtd4),
+('SV05', N'Lý Hải Yến', '2002-05-05', N'Quận 10', 'L02', 'sv05', lhy5),
+('SV06', N'Nguyễn Thị Hằng', '2002-06-06', N'Quận 11', 'L02', 'sv06', nth6),
+('SV07', N'Trần Văn Khoa', '2002-07-07', N'Quận 12', 'L02', 'sv07', tvk7),
+('SV08', N'Nguyễn Thị Mai', '2002-08-08', N'Quận 4', 'L02', 'sv08', ntm8);
 GO
 
 INSERT INTO HOCPHAN (MAHP, TENHP, SOTC)

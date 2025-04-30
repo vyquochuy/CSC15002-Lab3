@@ -45,13 +45,13 @@ def get_all_classes():
     conn.close()
     return rows
 
-def update_student(masv, hoten, ngaysinh, diachi):
+def update_student(masv, hoten, ngaysinh, diachi, malop, tendn):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
         UPDATE SINHVIEN
-        SET HOTEN = ?, NGAYSINH = ?, DIACHI = ?
+        SET HOTEN = ?, NGAYSINH = ?, DIACHI = ?, MALOP = ?, TENDN = ?
         WHERE MASV = ?
-    """, (hoten, ngaysinh, diachi, masv))
+    """, (hoten, ngaysinh, diachi,malop, tendn, masv))
     conn.commit()
     conn.close()

@@ -18,8 +18,6 @@ def open_students(manv, malop, manv_lop):
     for sv in students:
         listbox.insert(tk.END, f"{sv.MASV} - {sv.HOTEN}")
 
-    is_editable = (manv == manv_lop)
-
     selected_masv = tk.StringVar()
 
     def get_selected_masv():
@@ -32,6 +30,32 @@ def open_students(manv, malop, manv_lop):
             messagebox.showwarning("Cảnh báo", "Chọn một sinh viên trước!")
             return None
 
+    def open_view_info_screen():
+        masv = get_selected_masv()
+        if masv:
+            info_window = tk.Toplevel(stu)
+            info_window.title("Thông tin chi tiết sinh viên")
+            info_window.geometry("400x300")
+
+            conn = db.get_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT HOTEN, NGAYSINH, DIACHI, MALOP, TENDN FROM SINHVIEN WHERE MASV = ?", (masv,))
+            sv = cursor.fetchone()
+            conn.close()
+
+            labels = ["Họ tên", "Ngày sinh", "Địa chỉ", "Mã lớp", "Tên đăng nhập"]
+            values = [
+                sv.HOTEN,
+                str(sv.NGAYSINH).split(' ')[0],
+                sv.DIACHI,
+                sv.MALOP,
+                sv.TENDN
+            ]
+
+            for label_text, value in zip(labels, values):
+                tk.Label(info_window, text=f"{label_text}: {value}", anchor="w", justify="left", padx=10).pack(fill="x", pady=2)
+
+    
     def open_insert_score_screen():
         masv = get_selected_masv()
         if masv:
@@ -64,12 +88,14 @@ def open_students(manv, malop, manv_lop):
                 try:
                     db.insert_score(masv, mahp, diemthi, manv)
                     messagebox.showinfo("Thông báo", "Nhập điểm thành công!")
-                    score_window.destroy()
                 except Exception as e:
                     if "PRIMARY KEY" in str(e):
                         messagebox.showerror("Lỗi", "Sinh viên này đã có điểm học phần này rồi!")
                     else:
                         messagebox.showerror("Lỗi", f"Lỗi khác: {e}")
+                        
+                score_window.destroy()
+                    
 
             tk.Button(score_window, text="Xác nhận", command=submit_score).pack(pady=10)
 
@@ -83,35 +109,41 @@ def open_students(manv, malop, manv_lop):
 
             conn = db.get_connection()
             cursor = conn.cursor()
-            cursor.execute("SELECT HOTEN, NGAYSINH, DIACHI FROM SINHVIEN WHERE MASV = ?", (masv,))
+            # Sau khi fetch xong sinh viên
+            cursor.execute("SELECT HOTEN, NGAYSINH, DIACHI, MALOP, TENDN, MATKHAU FROM SINHVIEN WHERE MASV = ?", (masv,))
             sv = cursor.fetchone()
             conn.close()
 
-            tk.Label(edit_window, text="Họ tên:").pack()
-            entry_hoten = tk.Entry(edit_window, width=50)
-            entry_hoten.pack()
-            entry_hoten.insert(0, sv.HOTEN)
+            labels = ["Họ tên", "Ngày sinh (YYYY-MM-DD)", "Địa chỉ", "Mã lớp", "Tên đăng nhập"]
+            values = [
+                sv.HOTEN,
+                str(sv.NGAYSINH).split(' ')[0],
+                sv.DIACHI,
+                sv.MALOP,
+                sv.TENDN
+            ]
 
-            tk.Label(edit_window, text="Ngày sinh (YYYY-MM-DD):").pack()
-            entry_ngaysinh = tk.Entry(edit_window, width=50)
-            entry_ngaysinh.pack()
-            entry_ngaysinh.insert(0, str(sv.NGAYSINH).split(' ')[0])
+            entries = []  # List để lưu các Entry nếu cần dùng sau
 
-            tk.Label(edit_window, text="Địa chỉ:").pack()
-            entry_diachi = tk.Entry(edit_window, width=50)
-            entry_diachi.pack()
-            entry_diachi.insert(0, sv.DIACHI)
+            for label_text, value in zip(labels, values):
+                tk.Label(edit_window, text=label_text + ":").pack()
+                entry = tk.Entry(edit_window, width=50)
+                entry.pack()
+                entry.insert(0, value)
+                entries.append(entry)  # Lưu entry vào list để dùng sau
+
 
             def submit_edit():
-                hoten = entry_hoten.get().strip()
-                ngaysinh = entry_ngaysinh.get().strip()
-                diachi = entry_diachi.get().strip()
-
-                if not hoten or not ngaysinh or not diachi:
+                field_names = ["hoten", "ngaysinh", "diachi", "malop", "tendn"]
+                values = [entry.get().strip() for entry in entries[:5]]  
+                if any(v == "" for v in values):
                     messagebox.showwarning("Cảnh báo", "Điền đầy đủ thông tin trước khi lưu!")
                     return
 
-                db.update_student(masv, hoten, ngaysinh, diachi)
+                # Unpack theo thứ tự
+                hoten, ngaysinh, diachi, malop, tendn = values
+
+                db.update_student(masv, hoten, ngaysinh, diachi, malop, tendn)
                 messagebox.showinfo("Thông báo", "Cập nhật sinh viên thành công!")
                 edit_window.destroy()
                 stu.destroy()
@@ -119,8 +151,10 @@ def open_students(manv, malop, manv_lop):
 
             tk.Button(edit_window, text="Lưu thay đổi", command=submit_edit).pack(pady=10)
 
-    tk.Button(stu, text="Nhập điểm cho sinh viên", command=open_insert_score_screen).pack(pady=5)
-    tk.Button(stu, text="Thay đổi thông tin sinh viên", command=open_edit_info_screen).pack(pady=5)
-    tk.Button(stu, text="Quay lại Dashboard", command=lambda: (stu.destroy(), dashboard_screen.open_dashboard(manv))).pack(pady=5)
+    tk.Button(stu, text="Xem thông tin chi tiết",width=30, command=open_view_info_screen).pack(pady=5)
+    tk.Button(stu, text="Thay đổi thông tin sinh viên",width=30, command=open_edit_info_screen).pack(pady=5)
+    tk.Button(stu, text="Nhập điểm cho sinh viên",width=30, command=open_insert_score_screen).pack(pady=5)
+
+    tk.Button(stu, text="Quay lại Dashboard",width=30, command=lambda: (stu.destroy(), dashboard_screen.open_dashboard(manv))).pack(pady=5)
 
     stu.mainloop()
