@@ -5,6 +5,11 @@ GO
 USE QLSVNhom;
 GO
 
+--USE master;
+--go
+--ALTER DATABASE QLSVNhom SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+--DROP DATABASE QLSVNhom;
+
 -- b)
 -- Tạo bảng SINHVIEN
 CREATE TABLE SINHVIEN (
@@ -55,7 +60,33 @@ CREATE TABLE BANGDIEM (
 );
 GO
 
--- TEST 
+-- TEST database
+INSERT INTO LOP (MALOP, TENLOP, MANV)
+VALUES 
+('L01', N'Lớp Công Nghệ Thông Tin 1', 'NV01'),
+('L02', N'Lớp Công Nghệ Thông Tin 2', 'NV02'),
+('L03', N'Lớp Khoa Học Máy Tính 1', 'NV03');
+GO
+
+INSERT INTO SINHVIEN (MASV, HOTEN, NGAYSINH, DIACHI, MALOP, TENDN, MATKHAU)
+VALUES
+('SV01', N'Nguyễn Minh Anh', '2002-01-01', N'Quận 1', 'L01', 'sv01', 0x12341),
+('SV02', N'Lê Thị Bích', '2002-02-02', N'Quận 3', 'L01', 'sv02', 0x12342),
+('SV03', N'Phạm Quốc Cường', '2002-03-03', N'Quận 5', 'L01', 'sv03', 0x12343),
+('SV04', N'Võ Thanh Duy', '2002-04-04', N'Quận 7', 'L02', 'sv04', 0x12344),
+('SV05', N'Lý Hải Yến', '2002-05-05', N'Quận 10', 'L02', 'sv05', 0x12345),
+('SV06', N'Nguyễn Thị Hằng', '2002-06-06', N'Quận 11', 'L03', 'sv06', 0x12346),
+('SV07', N'Trần Văn Khoa', '2002-07-07', N'Quận 12', 'L03', 'sv07', 0x12347),
+('SV08', N'Nguyễn Thị Mai', '2002-08-08', N'Quận 4', 'L03', 'sv08', 0x12348);
+GO
+
+INSERT INTO HOCPHAN (MAHP, TENHP, SOTC)
+VALUES
+('HP01', N'Cơ sở dữ liệu', 3),
+('HP02', N'Mạng máy tính', 3),
+('HP03', N'Bảo mật cơ sở dữ liệu', 4);
+GO
+
 EXEC SP_INS_PUBLIC_NHANVIEN 
 	@MANV='NV01', 
 	@HOTEN=N'Nguyễn Văn A', 
@@ -73,30 +104,14 @@ EXEC SP_INS_PUBLIC_NHANVIEN
 	@MK = '67890';
 GO
 
-INSERT INTO LOP (MALOP, TENLOP, MANV)
-VALUES 
-('L01', N'Lớp Công Nghệ Thông Tin 1', 'NV01'),
-('L02', N'Lớp Công Nghệ Thông Tin 2', 'NV02');
+EXEC SP_INS_PUBLIC_NHANVIEN
+	@MANV = 'NV03',
+	@HOTEN = N'Phạm Thành C',
+	@EMAIL = 'ptc@fit.edu',
+	@LUONGCB = 10000000,
+	@TENDN = 'ptc',
+	@MK = '12345';
 GO
-
-INSERT INTO SINHVIEN (MASV, HOTEN, NGAYSINH, DIACHI, MALOP, TENDN, MATKHAU)
-VALUES
-('SV01', N'Nguyễn Minh Anh', '2002-01-01', N'Quận 1', 'L01', 'sv01', nma1),
-('SV02', N'Lê Thị Bích', '2002-02-02', N'Quận 3', 'L01', 'sv02', ltb2),
-('SV03', N'Phạm Quốc Cường', '2002-03-03', N'Quận 5', 'L02', 'sv03', pqc3),
-('SV04', N'Võ Thanh Duy', '2002-04-04', N'Quận 7', 'L02', 'sv04', vtd4),
-('SV05', N'Lý Hải Yến', '2002-05-05', N'Quận 10', 'L02', 'sv05', lhy5),
-('SV06', N'Nguyễn Thị Hằng', '2002-06-06', N'Quận 11', 'L02', 'sv06', nth6),
-('SV07', N'Trần Văn Khoa', '2002-07-07', N'Quận 12', 'L02', 'sv07', tvk7),
-('SV08', N'Nguyễn Thị Mai', '2002-08-08', N'Quận 4', 'L02', 'sv08', ntm8);
-GO
-
-INSERT INTO HOCPHAN (MAHP, TENHP, SOTC)
-VALUES
-('HP01', N'Cơ sở dữ liệu', 3),
-('HP02', N'Mạng máy tính', 3);
-GO
-
 
 SELECT * FROM NHANVIEN
 SELECT * FROM SINHVIEN
