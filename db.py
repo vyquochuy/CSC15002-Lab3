@@ -55,3 +55,11 @@ def update_student(masv, hoten, ngaysinh, diachi, malop, tendn):
     """, (hoten, ngaysinh, diachi,malop, tendn, masv))
     conn.commit()
     conn.close()
+
+def get_scores(masv, manv, matkhau):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("EXEC SP_GET_BANGDIEM ?, ?, ?", (masv, manv, matkhau))
+    rows = cursor.fetchall()
+    conn.close()
+    return rows

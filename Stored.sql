@@ -114,7 +114,7 @@ BEGIN
 
         IF @MANV IS NULL
         BEGIN
-            RAISERROR('Không tìm thấy nhân viên với TENDN = %s', 16, 1, @TENDN);
+            RAISERROR('Không tìm thấy nhân viên với MANV = %s', 16, 1, @TENDN);
             RETURN;
         END
 
@@ -237,7 +237,8 @@ BEGIN
 
     -- Mã hóa điểm
     BEGIN TRY
-		SET @ENCRYPTED_DIEM = EncryptByAsymKey(
+		SET @ENCRYPTED_DIEM = 
+        EncryptByAsymKey(
 			AsymKey_ID(@PUBKEY),
 			CONVERT(VARBINARY(MAX), CONVERT(NVARCHAR(20), @DIEMTHI))
 		);
@@ -248,5 +249,66 @@ BEGIN
 		RAISERROR('Lỗi khi mã hóa hoặc thêm điểm: %s', 16, 1);
 		RETURN;
 	END CATCH
+END
+GO
+
+---------------------------------------------------------------
+-- SP_GET_BANGDIEM (MASV, MANV, MK)
+---------------------------------------------------------------
+CREATE OR ALTER PROCEDURE SP_GET_BANGDIEM
+    @MASV VARCHAR(20),
+    @MANV VARCHAR(20),    -- chính là PUBKEY (MANV của nhân viên đã mã hóa điểm)
+    @MK    NVARCHAR(100)  -- mật khẩu để mở Asymmetric Key
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        ----------------------------------------------------------------
+        -- 1) Kiểm tra sinh viên tồn tại
+        ----------------------------------------------------------------
+        IF NOT EXISTS (SELECT 1 FROM SINHVIEN WHERE MASV = @MASV)
+        BEGIN
+            RAISERROR('Sinh viên với MASV "%s" không tồn tại.',16,1,@MASV);
+            RETURN;
+        END
+
+        ----------------------------------------------------------------
+        -- 2) Kiểm tra khóa bất đối xứng tồn tại
+        ----------------------------------------------------------------
+        IF NOT EXISTS (SELECT 1 FROM sys.asymmetric_keys WHERE name = @MANV)
+        BEGIN
+            RAISERROR('Khóa bất đối xứng cho MANV "%s" không tồn tại.',16,1,@MANV);
+            RETURN;
+        END
+
+        ----------------------------------------------------------------
+        -- 3) Lấy và giải mã điểm
+        ----------------------------------------------------------------
+        SELECT
+            BD.MAHP,
+            HP.TENHP,
+            DIEM = TRY_CAST(
+                CAST(
+                    DecryptByAsymKey(
+                        AsymKey_ID(@MANV),
+                        BD.DIEMTHI,
+                        @MK
+                    ) 
+                AS NVARCHAR(20)) 
+            AS FLOAT)
+        FROM BANGDIEM BD
+        JOIN HOCPHAN HP ON BD.MAHP = HP.MAHP
+        WHERE BD.MASV = @MASV;
+
+    END TRY
+    BEGIN CATCH
+        -- Bắt và trả về lỗi gốc
+        DECLARE 
+            @ErrMsg NVARCHAR(4000) = ERROR_MESSAGE(),
+            @ErrSev INT          = ERROR_SEVERITY(),
+            @ErrState INT        = ERROR_STATE();
+        RAISERROR(@ErrMsg, @ErrSev, @ErrState);
+        RETURN;
+    END CATCH
 END
 GO

@@ -72,7 +72,7 @@ def open_students(manv, malop, manv_lop):
             entry_diem.pack()
 
             def submit_score():
-                mahp = entry_mahp.get().strip()
+                mahp = entry_mahp.get().strip().upper()
                 diemthi_str = entry_diem.get().strip()
 
                 if not mahp or not diemthi_str:
@@ -150,10 +150,45 @@ def open_students(manv, malop, manv_lop):
                 dashboard_screen.open_dashboard(manv)
 
             tk.Button(edit_window, text="Lưu thay đổi", command=submit_edit).pack(pady=10)
+    
+    def open_score_view():
+        masv = get_selected_masv()
+        if masv:
+            pw_window = tk.Toplevel(stu)
+            pw_window.title("Nhập mật khẩu để xem điểm")
+            pw_window.geometry("300x150")
+
+            tk.Label(pw_window, text="Mật khẩu:").pack()
+            entry_pw = tk.Entry(pw_window, show="*")
+            entry_pw.pack()
+            
+            def submit_pw():
+                matkhau = entry_pw.get()
+                                
+                try:
+                    scores = db.get_scores(masv, manv, matkhau)
+                except Exception as e:
+                    messagebox.showerror("Lỗi", f"Lỗi giải mã hoặc mật khẩu không đúng.\nChi tiết: {e}")
+                    pw_window.destroy()
+                    return
+
+                pw_window.destroy()
+                score_window = tk.Toplevel(stu)
+                score_window.title("Bảng điểm")
+                score_window.geometry("400x300")
+
+                for row in scores:
+                    line = f"Môn: {row.TENHP} ({row.MAHP}) - Điểm: {row.DIEM}"
+                    tk.Label(score_window, text=line, anchor="w", padx=10).pack(fill="x", pady=2)
+
+            tk.Button(pw_window, text="Xác nhận", command=submit_pw).pack(pady=10)
+
 
     tk.Button(stu, text="Xem thông tin chi tiết",width=30, command=open_view_info_screen).pack(pady=5)
     tk.Button(stu, text="Thay đổi thông tin sinh viên",width=30, command=open_edit_info_screen).pack(pady=5)
     tk.Button(stu, text="Nhập điểm cho sinh viên",width=30, command=open_insert_score_screen).pack(pady=5)
+    tk.Button(stu, text="Xem điểm sinh viên", width=30, command=open_score_view).pack(pady=5)
+
 
     tk.Button(stu, text="Quay lại Dashboard",width=30, command=lambda: (stu.destroy(), dashboard_screen.open_dashboard(manv))).pack(pady=5)
 
