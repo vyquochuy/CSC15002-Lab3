@@ -67,15 +67,17 @@ def get_scores(masv, manv, matkhau):
 def insert_nhanvien(manv, hoten, email, luong, tendn, mk, pub):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("EXEC SP_INS_PUBLIC_ENCRYPT_NHANVIEN ?, ?, ?, ?, ?, ?, ?", 
-                   (manv, hoten, email, luong, tendn, mk, pub))
+    # Đảm bảo dùng SP_INS_PUBLIC_NHANVIEN để SQL Server tự tạo asymmetric key
+    cursor.execute("EXEC SP_INS_PUBLIC_NHANVIEN ?, ?, ?, ?, ?, ?", 
+                   (manv, hoten, email, luong, tendn, mk))
     conn.commit()
     conn.close()
 
 def select_nhanvien(tendn, mk):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("EXEC SP_SEL_PUBLIC_ENCRYPT_NHANVIEN ?, ?", (tendn, mk))
+    # Gọi đúng stored procedure đã tồn tại
+    cursor.execute("EXEC SP_SEL_PUBLIC_NHANVIEN ?, ?", (tendn, mk))
     rows = cursor.fetchall()
     conn.close()
     return rows

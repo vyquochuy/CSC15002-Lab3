@@ -37,25 +37,47 @@ def open_employees(manv):
     def view_employee_info():
         manv_selected = get_selected_manv()
         if manv_selected:
-            info_window = tk.Toplevel(emp_window)
-            info_window.title("Thông tin nhân viên")
-            center_window(info_window, 400, 250)
-            conn = db.get_connection()
-            cursor = conn.cursor()
-            cursor.execute("SELECT MANV, HOTEN, EMAIL, TENDN FROM NHANVIEN WHERE MANV = ?", (manv_selected,))
-            emp = cursor.fetchone()
-            conn.close()
-            if emp:
-                labels = ["Mã NV", "Họ tên", "Email", "Tên đăng nhập"]
-                values = [emp.MANV, emp.HOTEN, emp.EMAIL, emp.TENDN]
-                for label, value in zip(labels, values):
-                    tk.Label(info_window, text=f"{label}: {value}", anchor="w", padx=10).pack(fill="x", pady=2)
-            else:
-                tk.Label(info_window, text="Không tìm thấy thông tin nhân viên.").pack(pady=10)
+            def submit_pw(event=None):
+                mk = entry_pw.get()
+                try:
+                    # Gọi stored procedure để lấy thông tin nhân viên với lương chưa giải mã
+                    rows = db.select_nhanvien(manv_selected, mk)
+                    if not rows:
+                        pw_window.destroy()
+                        messagebox.showerror("Lỗi", "Không tìm thấy hoặc mật khẩu sai.")
+                        return
+                    emp = rows[0]
+                    info_window = tk.Toplevel(emp_window)
+                    info_window.title("Thông tin nhân viên")
+                    info_window.lift()
+                    info_window.attributes('-topmost', True)
+                    center_window(info_window, 400, 250)
+                    labels = ["Mã NV", "Họ tên", "Email", "Lương (mã hóa)"]
+                    # LUONG là giá trị chưa giải mã (dạng bytes)
+                    values = [emp.MANV, emp.HOTEN, emp.EMAIL, str(emp.LUONG) if hasattr(emp, "LUONG") else "N/A"]
+                    for label, value in zip(labels, values):
+                        tk.Label(info_window, text=f"{label}: {value}", anchor="w", padx=10).pack(fill="x", pady=2)
+                    pw_window.destroy()
+                except Exception as e:
+                    pw_window.destroy()
+                    messagebox.showerror("Lỗi", f"Lỗi truy vấn: {e}")
+
+            pw_window = tk.Toplevel(emp_window)
+            pw_window.title("Nhập mật khẩu để xem thông tin")
+            pw_window.lift()
+            pw_window.attributes('-topmost', True)
+            center_window(pw_window, 300, 120)
+            tk.Label(pw_window, text="Mật khẩu:").pack(pady=5)
+            entry_pw = tk.Entry(pw_window, show="*")
+            entry_pw.pack()
+            btn_xacnhan = tk.Button(pw_window, text="Xác nhận", command=submit_pw)
+            btn_xacnhan.pack(pady=10)
+            pw_window.bind('<Return>', submit_pw)
+            entry_pw.focus_set()
 
     # Thêm nút để thêm nhân viên mới
     def add_employee():
-        def submit_employee():
+        def submit_employee(event=None):
             manv = entry_manv.get().strip()
             hoten = entry_hoten.get().strip()
             email = entry_email.get().strip()
@@ -78,7 +100,7 @@ def open_employees(manv):
 
         add_window = tk.Toplevel(emp_window)
         add_window.title("Thêm nhân viên")
-        center_window(add_window, 300, 300)
+        center_window(add_window, 400, 350)  # Tăng kích thước cửa sổ
 
         tk.Label(add_window, text="MANV:").pack(pady=5)
         entry_manv = tk.Entry(add_window)
@@ -104,9 +126,22 @@ def open_employees(manv):
         entry_mk = tk.Entry(add_window, show="*")
         entry_mk.pack()
 
-        tk.Button(add_window, text="Thêm", command=submit_employee).pack(pady=10)
+        btn_them = tk.Button(add_window, text="Thêm", command=submit_employee)
+        btn_them.pack(pady=10)
+        add_window.bind('<Return>', submit_employee)
+        entry_manv.focus_set()
 
-    tk.Button(emp_window, text="Thêm nhân viên", command=add_employee, width=20).pack(pady=5)
-    tk.Button(emp_window, text="Xem thông tin nhân viên", command=view_employee_info, width=20).pack(pady=5)
-    tk.Button(emp_window, text="Quay lại Dashboard", command=lambda: (emp_window.destroy(), dashboard_screen.open_dashboard(manv)), width=20).pack(pady=5)
+    btn_them_nv = tk.Button(emp_window, text="Thêm nhân viên", command=add_employee, width=20)
+    btn_xem_nv = tk.Button(emp_window, text="Xem thông tin nhân viên", command=view_employee_info, width=20)
+    btn_quay_lai = tk.Button(emp_window, text="Quay lại Dashboard", command=lambda: (emp_window.destroy(), dashboard_screen.open_dashboard(manv)), width=20)
+
+    btn_them_nv.pack(pady=5)
+    btn_xem_nv.pack(pady=5)
+    btn_quay_lai.pack(pady=5)
+
+    # Hỗ trợ Enter cho các nút chính
+    emp_window.bind('<Return>', lambda event: btn_them_nv.invoke() if btn_them_nv == emp_window.focus_get() else
+                                            btn_xem_nv.invoke() if btn_xem_nv == emp_window.focus_get() else
+                                            btn_quay_lai.invoke() if btn_quay_lai == emp_window.focus_get() else None)
+
     emp_window.mainloop()

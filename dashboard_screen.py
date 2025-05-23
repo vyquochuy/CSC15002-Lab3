@@ -50,11 +50,8 @@ def open_dashboard(manv):
             messagebox.showwarning("Cảnh báo", "Chọn một lớp trước!")
 
     def open_employees():
-        if manv in ADMIN_MANV_LIST:
-            dash.destroy()
-            employees_screen.open_employees(manv)
-        else:
-            messagebox.showerror("Cấm truy cập", "Bạn không có quyền quản lý nhân viên!")
+        dash.destroy()
+        employees_screen.open_employees(manv)
 
     tk.Button(dash, text="Xem sinh viên", command=open_students, width=20).pack(pady=5)
     tk.Button(dash, text="Quản lý nhân viên", command=open_employees, width=20).pack(pady=5)

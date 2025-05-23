@@ -105,16 +105,17 @@ BEGIN
         FROM NHANVIEN
         WHERE TENDN = @TENDN;
 
-		-- Kiểm tra tồn tại khóa trước khi giải mã
-		IF NOT EXISTS(SELECT 1 FROM sys.asymmetric_keys WHERE name = @MANV)
-		BEGIN
-			RAISERROR('Khóa bất đối xứng cho MANV "%s" không tồn tại.', 16, 1, @MANV);
-			RETURN;
-		END
-
+        -- Kiểm tra tồn tại nhân viên trước
         IF @MANV IS NULL
         BEGIN
-            RAISERROR('Không tìm thấy nhân viên với MANV = %s', 16, 1, @TENDN);
+            RAISERROR('Không tìm thấy nhân viên với TENDN = %s', 16, 1, @TENDN);
+            RETURN;
+        END
+
+        -- Kiểm tra tồn tại khóa trước khi giải mã
+        IF NOT EXISTS(SELECT 1 FROM sys.asymmetric_keys WHERE name = @MANV)
+        BEGIN
+            RAISERROR('Khóa bất đối xứng cho MANV "%s" không tồn tại.', 16, 1, @MANV);
             RETURN;
         END
 
@@ -358,16 +359,17 @@ BEGIN
     FROM NHANVIEN
     WHERE TENDN = @TENDN;
 
+    -- Kiểm tra tồn tại nhân viên trước
+    IF @MANV IS NULL
+    BEGIN
+        RAISERROR('Không tìm thấy nhân viên với TENDN = %s', 16, 1, @TENDN);
+        RETURN;
+    END
+
     -- Kiểm tra tồn tại khóa trước khi giải mã
     IF NOT EXISTS(SELECT 1 FROM sys.asymmetric_keys WHERE name = @MANV)
     BEGIN
         RAISERROR('Khóa bất đối xứng cho MANV "%s" không tồn tại.', 16, 1, @MANV);
-        RETURN;
-    END
-
-    IF @MANV IS NULL
-    BEGIN
-        RAISERROR('Không tìm thấy nhân viên với TENDN = %s', 16, 1, @TENDN);
         RETURN;
     END
 
@@ -432,13 +434,14 @@ BEGIN
     FROM NHANVIEN
     WHERE TENDN = @TENDN;
 
-    -- Kiểm tra tồn tại khóa trước khi giải mã
-
+    -- Kiểm tra tồn tại nhân viên trước
     IF @MANV IS NULL
     BEGIN
         RAISERROR('Không tìm thấy nhân viên với TENDN = %s', 16, 1, @TENDN);
         RETURN;
     END
+
+    -- Kiểm tra tồn tại khóa trước khi giải mã
 
     IF NOT EXISTS(SELECT 1 FROM sys.asymmetric_keys WHERE name = @MANV)
     BEGIN

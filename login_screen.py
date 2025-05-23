@@ -24,7 +24,7 @@ def open_login():
     password_entry = tk.Entry(login_window, show="*")
     password_entry.pack()
 
-    def handle_login():
+    def handle_login(event=None):
         manv = manv_entry.get().upper()
         matkhau = password_entry.get()
         if db.login(manv, matkhau):
@@ -34,7 +34,10 @@ def open_login():
         else:
             messagebox.showerror("Thông báo", "Đăng nhập thất bại!")
 
-    tk.Button(login_window, text="Đăng nhập", command=handle_login).pack(pady=10)
+    btn_login = tk.Button(login_window, text="Đăng nhập", command=handle_login)
+    btn_login.pack(pady=10)
+    login_window.bind('<Return>', handle_login)
+    manv_entry.focus_set()
 
     login_window.mainloop()
 
