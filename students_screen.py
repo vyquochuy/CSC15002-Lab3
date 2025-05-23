@@ -3,10 +3,18 @@ from tkinter import messagebox
 import db
 import dashboard_screen
 
+def center_window(window, width, height):
+    window.update_idletasks()
+    screen_width = window.winfo_screenwidth()
+    screen_height = window.winfo_screenheight()
+    x = (screen_width // 2) - (width // 2)
+    y = (screen_height // 2) - (height // 2)
+    window.geometry(f"{width}x{height}+{x}+{y}")
+
 def open_students(manv, malop, manv_lop):
     stu = tk.Tk()
     stu.title(f"Danh sách sinh viên lớp {malop}")
-    stu.geometry("500x500")
+    center_window(stu, 500, 500)
 
     tk.Label(stu, text=f"Lớp: {malop} (Quản lý bởi {manv_lop})", font=("Arial", 14)).pack(pady=10)
 
@@ -35,7 +43,7 @@ def open_students(manv, malop, manv_lop):
         if masv:
             info_window = tk.Toplevel(stu)
             info_window.title("Thông tin chi tiết sinh viên")
-            info_window.geometry("400x300")
+            center_window(info_window, 400, 300)
 
             conn = db.get_connection()
             cursor = conn.cursor()
@@ -61,7 +69,7 @@ def open_students(manv, malop, manv_lop):
         if masv:
             score_window = tk.Toplevel(stu)
             score_window.title("Nhập điểm")
-            score_window.geometry("300x200")
+            center_window(score_window, 300, 200)
 
             tk.Label(score_window, text="Mã học phần:").pack()
             entry_mahp = tk.Entry(score_window)
@@ -105,7 +113,7 @@ def open_students(manv, malop, manv_lop):
             
             edit_window = tk.Toplevel(stu)
             edit_window.title("Thay đổi thông tin sinh viên")
-            edit_window.geometry("400x300")
+            center_window(edit_window, 400, 300)
 
             conn = db.get_connection()
             cursor = conn.cursor()
@@ -156,7 +164,7 @@ def open_students(manv, malop, manv_lop):
         if masv:
             pw_window = tk.Toplevel(stu)
             pw_window.title("Nhập mật khẩu để xem điểm")
-            pw_window.geometry("300x150")
+            center_window(pw_window, 300, 150)
 
             tk.Label(pw_window, text="Mật khẩu:").pack()
             entry_pw = tk.Entry(pw_window, show="*")
@@ -175,7 +183,7 @@ def open_students(manv, malop, manv_lop):
                 pw_window.destroy()
                 score_window = tk.Toplevel(stu)
                 score_window.title("Bảng điểm")
-                score_window.geometry("400x300")
+                center_window(score_window, 400, 300)
 
                 for row in scores:
                     line = f"Môn: {row.TENHP} ({row.MAHP}) - Điểm: {row.DIEM}"
@@ -188,7 +196,7 @@ def open_students(manv, malop, manv_lop):
         if masv:
             score_window = tk.Toplevel(stu)
             score_window.title("Nhập điểm")
-            score_window.geometry("300x200")
+            center_window(score_window, 300, 200)
 
             tk.Label(score_window, text="Mã học phần:").pack()
             entry_mahp = tk.Entry(score_window)

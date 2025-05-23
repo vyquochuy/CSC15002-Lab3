@@ -3,10 +3,18 @@ from tkinter import messagebox
 import db
 import dashboard_screen
 
+def center_window(window, width, height):
+    window.update_idletasks()
+    screen_width = window.winfo_screenwidth()
+    screen_height = window.winfo_screenheight()
+    x = (screen_width // 2) - (width // 2)
+    y = (screen_height // 2) - (height // 2)
+    window.geometry(f"{width}x{height}+{x}+{y}")
+
 def open_login():
     login_window = tk.Tk()
     login_window.title("Đăng nhập")
-    login_window.geometry("300x200")
+    center_window(login_window, 300, 200)
 
     tk.Label(login_window, text="MANV:").pack(pady=5)
     manv_entry = tk.Entry(login_window)

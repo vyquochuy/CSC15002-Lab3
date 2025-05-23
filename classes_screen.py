@@ -2,10 +2,18 @@ import tkinter as tk
 from tkinter import messagebox
 import db
 
+def center_window(window, width, height):
+    window.update_idletasks()
+    screen_width = window.winfo_screenwidth()
+    screen_height = window.winfo_screenheight()
+    x = (screen_width // 2) - (width // 2)
+    y = (screen_height // 2) - (height // 2)
+    window.geometry(f"{width}x{height}+{x}+{y}")
+
 def open_classes(manv):
     class_window = tk.Tk()
     class_window.title("Quản lý lớp học")
-    class_window.geometry("500x500")
+    center_window(class_window, 500, 500)
 
     # Hiển thị danh sách lớp học
     classes = db.get_all_classes()  # Tạo hàm này trong db.py để lấy danh sách lớp học
@@ -36,7 +44,7 @@ def open_classes(manv):
 
         add_window = tk.Toplevel(class_window)
         add_window.title("Thêm lớp học")
-        add_window.geometry("300x200")
+        center_window(add_window, 300, 200)
 
         tk.Label(add_window, text="Mã lớp:").pack(pady=5)
         entry_malop = tk.Entry(add_window)

@@ -3,11 +3,23 @@ from tkinter import messagebox
 import db
 import login_screen
 import students_screen
+import employees_screen
+
+# Danh sách các MANV có quyền quản lý nhân viên (bạn có thể cập nhật hoặc lấy từ DB khi cần)
+ADMIN_MANV_LIST = ['NV01', 'NV02']  # Ví dụ các MANV được phép quản lý nhân viên
+
+def center_window(window, width, height):
+    window.update_idletasks()
+    screen_width = window.winfo_screenwidth()
+    screen_height = window.winfo_screenheight()
+    x = (screen_width // 2) - (width // 2)
+    y = (screen_height // 2) - (height // 2)
+    window.geometry(f"{width}x{height}+{x}+{y}")
 
 def open_dashboard(manv):
     dash = tk.Tk()
     dash.title("Dashboard - Danh sách lớp")
-    dash.geometry("500x500")
+    center_window(dash, 500, 500)
 
     tk.Label(dash, text=f"Xin chào {manv}", font=("Arial", 14)).pack(pady=10)
 
@@ -37,7 +49,15 @@ def open_dashboard(manv):
         else:
             messagebox.showwarning("Cảnh báo", "Chọn một lớp trước!")
 
-    tk.Button(dash, text="Xem sinh viên", command=open_students).pack(pady=5)
-    tk.Button(dash, text="Đăng xuất", command=lambda: (dash.destroy(), login_screen.open_login())).pack(pady=5)
+    def open_employees():
+        if manv in ADMIN_MANV_LIST:
+            dash.destroy()
+            employees_screen.open_employees(manv)
+        else:
+            messagebox.showerror("Cấm truy cập", "Bạn không có quyền quản lý nhân viên!")
 
+    tk.Button(dash, text="Xem sinh viên", command=open_students, width=20).pack(pady=5)
+    tk.Button(dash, text="Quản lý nhân viên", command=open_employees, width=20).pack(pady=5)
+    tk.Button(dash, text="Đăng xuất", command=lambda: (dash.destroy(), login_screen.open_login()), width=20).pack(pady=5)
+    
     dash.mainloop()
