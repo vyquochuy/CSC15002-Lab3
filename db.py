@@ -63,3 +63,34 @@ def get_scores(masv, manv, matkhau):
     rows = cursor.fetchall()
     conn.close()
     return rows
+
+def insert_nhanvien(manv, hoten, email, luong, tendn, mk, pub):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("EXEC SP_INS_PUBLIC_ENCRYPT_NHANVIEN ?, ?, ?, ?, ?, ?, ?", 
+                   (manv, hoten, email, luong, tendn, mk, pub))
+    conn.commit()
+    conn.close()
+
+def select_nhanvien(tendn, mk):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("EXEC SP_SEL_PUBLIC_ENCRYPT_NHANVIEN ?, ?", (tendn, mk))
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
+
+def insert_class(malop, tenlop, manv):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO LOP (MALOP, TENLOP, MANV) VALUES (?, ?, ?)", (malop, tenlop, manv))
+    conn.commit()
+    conn.close()
+
+def get_all_employees():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT MANV, HOTEN FROM NHANVIEN")
+    rows = cursor.fetchall()
+    conn.close()
+    return rows

@@ -312,3 +312,151 @@ BEGIN
     END CATCH
 END
 GO
+
+---------------------------------------------------------------
+-- SP_INS_PUBLIC_ENCRYPT_NHANVIEN
+---------------------------------------------------------------
+CREATE OR ALTER PROCEDURE SP_INS_PUBLIC_ENCRYPT_NHANVIEN
+    @MANV VARCHAR(20),
+    @HOTEN NVARCHAR(100),
+    @EMAIL VARCHAR(20),
+    @LUONG VARBINARY(MAX), -- Dữ liệu đã được mã hóa từ client
+    @TENDN NVARCHAR(100),
+    @MK NVARCHAR(100), -- Mật khẩu đã được mã hóa SHA1 từ client
+    @PUB VARCHAR(20) -- Khóa công khai được tạo từ client
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Kiểm tra trùng lặp MANV
+    IF EXISTS(SELECT 1 FROM NHANVIEN WHERE MANV = @MANV)
+    BEGIN
+        RAISERROR('MANV "%s" đã tồn tại, không thể insert.', 16, 1, @MANV);
+        RETURN;
+    END
+
+    -- Thêm dữ liệu vào bảng NHANVIEN
+    INSERT INTO NHANVIEN (MANV, HOTEN, EMAIL, LUONG, TENDN, MATKHAU, PUBKEY)
+    VALUES (@MANV, @HOTEN, @EMAIL, @LUONG, @TENDN, @MK, @PUB);
+END
+GO
+
+---------------------------------------------------------------
+-- SP_SEL_PUBLIC_ENCRYPT_NHANVIEN
+---------------------------------------------------------------
+CREATE OR ALTER PROCEDURE SP_SEL_PUBLIC_ENCRYPT_NHANVIEN
+    @TENDN NVARCHAR(100),
+    @MK NVARCHAR(100) -- Mật khẩu để mở khóa
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @MANV VARCHAR(20);
+    
+    -- Lấy MANV từ TENDN
+    SELECT @MANV = MANV
+    FROM NHANVIEN
+    WHERE TENDN = @TENDN;
+
+    -- Kiểm tra tồn tại khóa trước khi giải mã
+    IF NOT EXISTS(SELECT 1 FROM sys.asymmetric_keys WHERE name = @MANV)
+    BEGIN
+        RAISERROR('Khóa bất đối xứng cho MANV "%s" không tồn tại.', 16, 1, @MANV);
+        RETURN;
+    END
+
+    IF @MANV IS NULL
+    BEGIN
+        RAISERROR('Không tìm thấy nhân viên với TENDN = %s', 16, 1, @TENDN);
+        RETURN;
+    END
+
+    -- Truy vấn và giải mã LUONG với password
+    SELECT
+        MANV,
+        HOTEN,
+        EMAIL,
+        LUONGCB = TRY_CAST(
+            CAST(
+                DecryptByAsymKey(AsymKey_ID(@MANV), LUONG, @MK) AS NVARCHAR(20)
+            ) AS INT
+        )
+    FROM NHANVIEN
+    WHERE TENDN = @TENDN;
+END
+GO
+
+
+---------------------------------------------------------------
+-- SP_INS_PUBLIC_ENCRYPT_NHANVIEN
+---------------------------------------------------------------
+CREATE OR ALTER PROCEDURE SP_INS_PUBLIC_ENCRYPT_NHANVIEN
+    @MANV VARCHAR(20),
+    @HOTEN NVARCHAR(100),
+    @EMAIL VARCHAR(20),
+    @LUONG VARBINARY(MAX), -- Dữ liệu đã được mã hóa từ client
+    @TENDN NVARCHAR(100),
+    @MK NVARCHAR(100), -- Mật khẩu đã được mã hóa SHA1 từ client
+    @PUB VARCHAR(20) -- Khóa công khai được tạo từ client
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Kiểm tra trùng lặp MANV
+    IF EXISTS(SELECT 1 FROM NHANVIEN WHERE MANV = @MANV)
+    BEGIN
+        RAISERROR('MANV "%s" đã tồn tại, không thể insert.', 16, 1, @MANV);
+        RETURN;
+    END
+
+    -- Thêm dữ liệu vào bảng NHANVIEN
+    INSERT INTO NHANVIEN (MANV, HOTEN, EMAIL, LUONG, TENDN, MATKHAU, PUBKEY)
+    VALUES (@MANV, @HOTEN, @EMAIL, @LUONG, @TENDN, @MK, @PUB);
+END
+GO
+
+---------------------------------------------------------------
+-- SP_SEL_PUBLIC_ENCRYPT_NHANVIEN
+---------------------------------------------------------------
+CREATE OR ALTER PROCEDURE SP_SEL_PUBLIC_ENCRYPT_NHANVIEN
+    @TENDN NVARCHAR(100),
+    @MK NVARCHAR(100) -- Mật khẩu để mở khóa
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @MANV VARCHAR(20);
+    
+    -- Lấy MANV từ TENDN
+    SELECT @MANV = MANV
+    FROM NHANVIEN
+    WHERE TENDN = @TENDN;
+
+    -- Kiểm tra tồn tại khóa trước khi giải mã
+
+    IF @MANV IS NULL
+    BEGIN
+        RAISERROR('Không tìm thấy nhân viên với TENDN = %s', 16, 1, @TENDN);
+        RETURN;
+    END
+
+    IF NOT EXISTS(SELECT 1 FROM sys.asymmetric_keys WHERE name = @MANV)
+    BEGIN
+        RAISERROR('Khóa bất đối xứng cho MANV "%s" không tồn tại.', 16, 1, @MANV);
+        RETURN;
+    END
+
+    -- Truy vấn và giải mã LUONG với password
+    SELECT
+        MANV,
+        HOTEN,
+        EMAIL,
+        LUONGCB = TRY_CAST(
+            CAST(
+                DecryptByAsymKey(AsymKey_ID(@MANV), LUONG, @MK) AS NVARCHAR(20)
+            ) AS INT
+        )
+    FROM NHANVIEN
+    WHERE TENDN = @TENDN;
+END
+GO

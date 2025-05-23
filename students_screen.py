@@ -183,6 +183,44 @@ def open_students(manv, malop, manv_lop):
 
             tk.Button(pw_window, text="Xác nhận", command=submit_pw).pack(pady=10)
 
+    def open_insert_score_screen():
+        masv = get_selected_masv()
+        if masv:
+            score_window = tk.Toplevel(stu)
+            score_window.title("Nhập điểm")
+            score_window.geometry("300x200")
+
+            tk.Label(score_window, text="Mã học phần:").pack()
+            entry_mahp = tk.Entry(score_window)
+            entry_mahp.pack()
+
+            tk.Label(score_window, text="Điểm thi:").pack()
+            entry_diem = tk.Entry(score_window)
+            entry_diem.pack()
+
+            def submit_score():
+                mahp = entry_mahp.get().strip().upper()
+                diemthi_str = entry_diem.get().strip()
+
+                if not mahp or not diemthi_str:
+                    messagebox.showwarning("Cảnh báo", "Mã học phần và điểm thi không được để trống!")
+                    return
+                
+                try:
+                    diemthi = float(diemthi_str)
+                except ValueError:
+                    messagebox.showerror("Lỗi", "Điểm thi phải là số!")
+                    return
+
+                try:
+                    db.insert_score(masv, mahp, diemthi, manv)  # Gọi hàm insert_score đã tạo trong db.py
+                    messagebox.showinfo("Thông báo", "Nhập điểm thành công!")
+                except Exception as e:
+                    messagebox.showerror("Lỗi", f"Lỗi khác: {e}")
+                    
+                score_window.destroy()
+
+
 
     tk.Button(stu, text="Xem thông tin chi tiết",width=30, command=open_view_info_screen).pack(pady=5)
     tk.Button(stu, text="Thay đổi thông tin sinh viên",width=30, command=open_edit_info_screen).pack(pady=5)
