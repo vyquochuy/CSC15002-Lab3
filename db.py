@@ -10,7 +10,10 @@ def get_connection():
     return conn
 
 def login(manv, matkhau):
-    hashed_pw = hashlib.sha1(matkhau.encode()).digest()
+    # Mã hóa mật khẩu thành UTF-16 little-endian (giống SQL Server)
+    matkhau_utf16 = matkhau.encode('utf-16le')
+    hashed_pw = hashlib.sha1(matkhau_utf16).digest()
+    
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT 1 FROM NHANVIEN WHERE MANV = ? AND MATKHAU = ?", (manv, hashed_pw))
