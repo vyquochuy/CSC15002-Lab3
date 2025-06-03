@@ -89,7 +89,8 @@ def get_scores(masv, manv, mk):
     return result
 
 def insert_nhanvien(manv, hoten, email, luong, tendn, mk, pub):
-    hashed_pw = hashlib.sha1(mk.encode()).digest()
+    # Hash mật khẩu giống như login (SHA1 trên UTF-16LE)
+    hashed_pw = hashlib.sha1(mk.encode('utf-16le')).digest()
     public_key = load_public_key()
     encrypted_luong = encrypt_rsa(str(luong), public_key)
 
@@ -101,7 +102,8 @@ def insert_nhanvien(manv, hoten, email, luong, tendn, mk, pub):
     conn.close()
 
 def select_nhanvien(tendn, mk):
-    hashed_pw = hashlib.sha1(mk.encode()).digest()
+    # Hash mật khẩu giống như login (SHA1 trên UTF-16LE)
+    hashed_pw = hashlib.sha1(mk.encode('utf-16le')).digest()
     
     conn = get_connection()
     cursor = conn.cursor()
@@ -128,3 +130,18 @@ def select_nhanvien(tendn, mk):
         })
     
     return decrypted_rows
+
+def get_all_employees():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT MANV, HOTEN, TENDN FROM NHANVIEN")
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
+
+def delete_employee(tendn):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM NHANVIEN WHERE TENDN = ?", (tendn,))
+    conn.commit()
+    conn.close()

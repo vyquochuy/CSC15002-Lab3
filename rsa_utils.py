@@ -1,3 +1,4 @@
+import os
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.backends import default_backend
@@ -21,11 +22,19 @@ def generate_keys():
             format=serialization.PublicFormat.SubjectPublicKeyInfo
         ))
 
+def ensure_keys_exist():
+    if not os.path.exists("keys"):
+        os.makedirs("keys")
+    if not (os.path.exists("keys/private_key.pem") and os.path.exists("keys/public_key.pem")):
+        generate_keys()
+
 def load_public_key():
+    ensure_keys_exist()
     with open("keys/public_key.pem", "rb") as f:
         return serialization.load_pem_public_key(f.read(), backend=default_backend())
 
 def load_private_key():
+    ensure_keys_exist()
     with open("keys/private_key.pem", "rb") as f:
         return serialization.load_pem_private_key(f.read(), password=None, backend=default_backend())
 

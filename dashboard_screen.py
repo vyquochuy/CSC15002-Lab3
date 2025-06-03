@@ -19,42 +19,56 @@ def center_window(window, width, height):
 def open_dashboard(manv):
     dash = tk.Tk()
     dash.title("Dashboard - Danh sách lớp")
-    center_window(dash, 500, 500)
+    center_window(dash, 700, 500)  # Giảm kích thước về 700x500
+    dash.lift()
+    dash.attributes('-topmost', True)
+    dash.after(100, lambda: dash.attributes('-topmost', False))
 
-    tk.Label(dash, text=f"Xin chào {manv}", font=("Arial", 14)).pack(pady=10)
+    tk.Label(dash, text=f"Xin chào {manv}", font=("Arial", 18)).pack(pady=20)
 
     classes = db.get_all_classes()
 
-    listbox = tk.Listbox(dash, width=70)
-    listbox.pack(pady=10)
+    listbox = tk.Listbox(dash, width=100)
+    listbox.pack(pady=20)
 
     for lop in classes:
         listbox.insert(tk.END, f"{lop.MALOP} - {lop.TENLOP} (Quản lý: {lop.MANV})")
 
-    def open_students():
+    def open_students(event=None):
         selected = listbox.curselection()
-        
         if selected:
             line = listbox.get(selected[0])
             parts = line.split(' - ')
             malop = parts[0].strip()
             manv_lop = parts[1].split('(Quản lý:')[1].replace(')', '').strip()
-
             if manv != manv_lop:
                 messagebox.showerror("Cấm truy cập", "Bạn không có quyền xem danh sách sinh viên của lớp này!")
                 return
-            
             dash.destroy()
             students_screen.open_students(manv, malop, manv_lop)
         else:
             messagebox.showwarning("Cảnh báo", "Chọn một lớp trước!")
 
-    def open_employees():
+    def open_employees(event=None):
         dash.destroy()
         employees_screen.open_employees(manv)
 
-    tk.Button(dash, text="Xem sinh viên", command=open_students, width=20).pack(pady=5)
-    tk.Button(dash, text="Quản lý nhân viên", command=open_employees, width=20).pack(pady=5)
-    tk.Button(dash, text="Đăng xuất", command=lambda: (dash.destroy(), login_screen.open_login()), width=20).pack(pady=5)
-    
+    btn_sv = tk.Button(dash, text="Xem sinh viên", command=open_students, width=30)
+    btn_nv = tk.Button(dash, text="Quản lý nhân viên", command=open_employees, width=30)
+    btn_logout = tk.Button(dash, text="Đăng xuất", command=lambda: (dash.destroy(), login_screen.open_login()), width=30)
+
+    btn_sv.pack(pady=10)
+    btn_nv.pack(pady=10)
+    btn_logout.pack(pady=10)
+
+    # Tab chuyển giữa các nút, Enter để kích hoạt
+    btn_sv.focus_set()
+    btn_sv.bind('<Return>', open_students)
+    btn_nv.bind('<Return>', open_employees)
+    btn_logout.bind('<Return>', lambda e: btn_logout.invoke())
+
+    # Đảm bảo căn giữa sau khi tạo widget
+    dash.update_idletasks()
+    center_window(dash, 700, 500)
+
     dash.mainloop()
